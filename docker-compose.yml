@@ -1,0 +1,40 @@
+version: '3.4'
+
+services:
+
+  test.api:
+      container_name: test-api-container
+      restart: always
+      build:
+        context: .
+        dockerfile: Dockerfile
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Production
+        - ASPNETCORE_URLS=http://+:80
+      ports:
+        - "5000:80"
+      networks:
+        - myappnetwork
+
+  prometheus:
+    image: ubuntu/prometheus
+    container_name: prometheus
+    ports:
+      - "5100:9090"
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "5200:3000"
+    volumes:
+      - ./grafana-data/data:/var/lib/grafana
+
+networks:
+  myappnetwork:
+    name: myappnetwork
+    driver: bridge
